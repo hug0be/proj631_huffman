@@ -1,7 +1,5 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 typedef struct BNode {
 	char label;
@@ -33,7 +31,7 @@ void show_BNode_array(BNode array[], int array_size) {
 		printf(", frequence: %d", p->frequence);
 		printf(", left: %p, right: %p", p->left, p->right);
 		printf(", pointeur: %p\n", p);
-	};
+	}
 }
 
 void show_tree(BNode* node, int niveau) {
@@ -85,7 +83,7 @@ unsigned char get_next_label(BNode **pCurrentNode, int nextTurn, BNode *pRoot) {
 
 int main() {
 	//	Ouverture du fichier fréquence
-	char freqFileName[] = "exemple_freq.txt";
+	char freqFileName[] = "../exemple_freq.txt";
 	FILE *freqFile = fopen(freqFileName, "r");
 	if (freqFile == NULL) printf("Impossible d'ouvrir le fichier %s", freqFileName);
 
@@ -140,14 +138,17 @@ int main() {
 	
 	// Récupération de la racine et affichage de l'arbre
 	BNode* pRoot = &nodes[nbNodes-1];
-	printf("Arbre de Huffman\n");
-	show_tree(pRoot, 0);
+//	printf("Arbre de Huffman\n");
+//	show_tree(pRoot, 0);
 	
 //	------------ LECTURE DU FICHIER COMPRESSE ET ECRITURE DU FICHIER DECOMPRESSE ------------
 
-	char fileName[] = "exemple_comp.bin";
+	char fileName[] = "../exemple_comp.bin";
 	FILE *binaryFile = fopen(fileName, "rb");
-	if (binaryFile == NULL) printf("Impossible d'ouvrir le fichier binaire %s", fileName);
+	if (binaryFile == NULL) {
+        printf("Impossible d'ouvrir le fichier binaire %s", fileName);
+        exit(0);
+    }
 	
 	unsigned char buffer;
 	
@@ -157,8 +158,11 @@ int main() {
 	// pCurrentNode est un "curseur" qui donne la position sur l'arbre
 	BNode *pCurrentNode = pRoot;
 	
-    FILE *outputFile = fopen("output.txt", "w");
-	if (outputFile == NULL) printf("Impossible d'ouvrir le fichier output.txt");
+    FILE *outputFile = fopen("../output.txt", "w");
+	if (outputFile == NULL) {
+        printf("Impossible d'ouvrir le fichier output.txt");
+        exit(0);
+    }
 	
     // Lecture octet par octet 
     while(fread(&buffer, 1, 1, binaryFile) == 1) {
@@ -178,20 +182,21 @@ int main() {
 	fseek(binaryFile, 0L, SEEK_END);
 	fseek(outputFile, 0L, SEEK_END);
 	
-	float sizeBinaryFile = ftell(binaryFile);
-	float sizeOutputFile = ftell(outputFile);
+	long sizeBinaryFile = ftell(binaryFile);
+	long sizeOutputFile = ftell(outputFile);
 	
 	fclose(outputFile);
 	fclose(binaryFile);
 	
-	printf("Taille des fichiers: compresse %.0f octets | decompresse %.0f octets\n", sizeBinaryFile, sizeOutputFile);
-	printf("Taux de compression: %.2f\n", 1-(sizeBinaryFile/sizeOutputFile));
+	printf("Taille des fichiers: compresse %ld octets | decompresse %ld octets\n", sizeBinaryFile, sizeOutputFile);
+	printf("Taux de compression: %.2f\n", 1. - (float) sizeBinaryFile / sizeOutputFile);
 	
 // ------ CALCUL DU NB DE BITS MOYEN -------
 
 	printf("Nombre de caractere: %d\n", nbLabels);
-	printf("Nombre de bits: %.0f\n", 8.0*sizeBinaryFile);
-	printf("Nombre de bit moyen par caractere: %.2f", sizeBinaryFile/nbLabels*8);
+	printf("Nombre de bits: %.0f\n", 8. * sizeBinaryFile);
+	printf("Nombre de bit moyen par caractere: %.2f", (float) sizeBinaryFile / nbLabels * 8.);
+
 	return 0;
 }
 
